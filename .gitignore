@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Local log & state files
+*.log
+.sg_state.json
+opencode_convo_cache.md
+
+# Project-specific scrapers, runners, and hubs
+policing_hub.py
+lanes/
+antigravity_daemon.py
+parallel_prompt_runner.py
+lane_delta_pipeline.py
+live_patcher.py
+live_watcher.py
+qualitative_scoring.py
+preflight_gate.py
+data_starvation_guard.py
+overnight_runner.py
+overnight_runner.sh

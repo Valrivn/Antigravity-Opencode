@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  com.antigravity.runner.plist
+  ============================
+  macOS launchd user-level service for the Antigravity autonomous runner.
+
+  Runs as USER USER_NAME_PLACEHOLDER — NO sudo, NO password prompt.
+  launchd will restart the watchdog automatically if it crashes (KeepAlive=true).
+  The watchdog itself manages the runner schedule and failure recovery internally.
+
+  Install:  bash opencode_scripts/install_launchd.sh
+  Start:    launchctl start com.antigravity.runner
+  Stop:     launchctl stop com.antigravity.runner
+  Status:   launchctl print gui/$(id -u)/com.antigravity.runner
+  Logs:     tail -f WORKSPACE_ROOT_PLACEHOLDER/opencode_scripts/watchdog.log
+-->
+<plist version="1.0">
+<dict>
+    <!-- Service identity -->
+    <key>Label</key>
+    <string>com.antigravity.runner</string>
+
+    <!-- The watchdog script is the persistent entrypoint -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>WORKSPACE_ROOT_PLACEHOLDER/opencode_scripts/runner_watchdog.sh</string>
+    </array>
+
+    <!-- Working directory — must be a path launchd can always access. -->
+    <key>WorkingDirectory</key>
+    <string>HOME_DIR_PLACEHOLDER</string>
+
+    <!-- Do NOT auto-start on login — user manually starts it once via install_launchd.sh -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <!-- KeepAlive=true: if the watchdog crashes, launchd restarts it automatically -->
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- Throttle rapid crash-restart loops (30s minimum between restarts) -->
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <!-- Redirect stdout/stderr to watchdog log -->
+    <key>StandardOutPath</key>
+    <string>WORKSPACE_ROOT_PLACEHOLDER/opencode_scripts/watchdog_launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>WORKSPACE_ROOT_PLACEHOLDER/opencode_scripts/watchdog_launchd_err.log</string>
+
+    <!-- Environment — ensure PATH includes homebrew and pyenv -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key>
+        <string>HOME_DIR_PLACEHOLDER</string>
+        <key>USER</key>
+        <string>USER_NAME_PLACEHOLDER</string>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <key>SHELL</key>
+        <string>/bin/zsh</string>
+        <key>LANG</key>
+        <string>en_US.UTF-8</string>
+    </dict>
+
+    <!-- Soft resource limits -->
+    <key>SoftResourceLimits</key>
+    <dict>
+        <!-- Allow large numbers of open files for async scrapers -->
+        <key>NumberOfFiles</key>
+        <integer>8192</integer>
+    </dict>
+</dict>
+</plist>
